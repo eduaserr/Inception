@@ -1,0 +1,95 @@
+version: '3.8' # Change to 3 or keep it as 3.8
+
+networks:
+  eduaserr_inception:
+    name: eduaserr_inception
+    driver: bridge
+
+services:
+  mariadb:
+    image: mariadb
+    container_name: mariadb
+    expose:
+      - "3306"
+    env_file: ./.env
+    build:
+      context: ./requirements/mariadb
+      dockerfile: Dockerfile
+    environment:
+      - DB_NAME=${DATABASE_NAME}
+      - DB_USER=${USER_NAME}
+      - DB_PASS=${USER_PASSWORD}
+      - DB_ROOT_USER=${ADMIN_NAME}
+      - DB_ROOT_PASSWORD=${ADMIN_PASSWORD}
+    networks:
+      - eduaserr_inception
+    volumes:
+      - db-volume:/var/lib/mysql
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    env_file: ./.env
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      - wp-volume:/var/www/html
+    networks:
+      - eduaserr_inception
+    restart: always
+
+  wordpress:
+    image: wordpress
+    container_name: wordpress
+    env_file: ./.env
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    environment:
+      - DB_NAME=${DATABASE_NAME}
+      - DB_HOST=${DATABASE_HOST}
+      - DB_USER=${USER_NAME}
+      - DB_PASS=${USER_PASSWORD}
+      - DB_ROOT=${ADMIN_NAME}
+      - DB_ROOT_PASSWORD=${ADMIN_PASSWORD}
+      - WP_TITLE=eduaserr Inception
+      - WP_URL=https://${DOMAIN_NAME}
+      - WP_USER=${USER_NAME}
+      - WP_USER_PASS=${USER_PASSWORD}
+      - WP_USER_EMAIL=${USER_NAME}@${EMAIL_DOMAIN}
+      - WP_ADMIN=${ADMIN_NAME}
+      - WP_ADMIN_PASS=${ADMIN_PASSWORD}
+      - WP_ADMIN_EMAIL=${ADMIN_NAME}@${EMAIL_DOMAIN}
+    volumes:
+      - wp-volume:/var/www/html
+    networks:
+      - eduaserr_inception
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  db-volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/data/mariadb
+      o: bind
+  wp-volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/data/wordpress
+      o: bind
