@@ -83,24 +83,27 @@ images remain replaceable.
 ## Prerequisites
 
 Use a Debian 12 virtual machine without a graphical environment. Install
-Docker, Docker Compose V2, Git and Make. Add the project domain to the local
+Docker, Docker Compose V2, Git, and Make. Add the project domain to your
+local hosts file.
 
 ```bash
 sudo apt update
 sudo apt install -y docker.io docker-compose-plugin
 ```
 
-
-### Instalación manual
-Si el comando anterior no instala Docker Compose correctamente, añade el repositorio oficial de Docker.
+### Manual installation
+If the previous command does not install Docker Compose correctly, add the
+official Docker repository.
 
 ```bash
 sudo apt update && sudo apt install -y ca-certificates curl gnupg
 ```
-Crea la carpeta para las claves:
+Create the key directory:
+```bash
 sudo install -m 0755 -d /etc/apt/keyrings
+```
 
-Descarga la clave de Docker y repositorio de Debian oficial
+Download the Docker GPG key and the official Debian repository:
 ```bash
 sudo curl -fsSL https://download.docker.com/linux/debian/gpg \
   -o /etc/apt/keyrings/docker.asc
@@ -111,19 +114,19 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.
 sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
 
-Instala Docker y sus plugins:
+Install Docker and its plugins:
 ```bash
 sudo apt install -y docker-ce docker-ce-cli containerd.io \
   docker-buildx-plugin docker-compose-plugin
 ```
-Inicia docker y añade al usuario al grupo docker
+Start Docker and add the current user to the docker group:
 ```bash
 sudo systemctl enable --now docker
 sudo usermod -aG docker "$USER"
 ```
-reinicia o -> newgrp docker
+Log out and back in, or run: `newgrp docker`
 
-Comprueba la instalación:
+Verify the installation:
 ```bash
 docker --version
 docker compose version
