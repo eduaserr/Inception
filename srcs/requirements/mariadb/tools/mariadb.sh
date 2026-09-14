@@ -4,18 +4,18 @@ sleep 3
 
 if  ! mysql -e "USE ${DB_NAME};" 2>/dev/null;
 then
-    echo "Configurando base de datos inicial..."
+    echo "Setting up the initial database..."
     
-    # Establecer contraseña de root (sin autenticación inicial)
+    # Set the root password (without initial authentication)
     mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';"
     
-    # Todos los comandos posteriores usan autenticación
+    # All subsequent commands use authentication
     mysql -u root -p${DB_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
     mysql -u root -p${DB_ROOT_PASSWORD} -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';"
     mysql -u root -p${DB_ROOT_PASSWORD} -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';"
     mysql -u root -p${DB_ROOT_PASSWORD} -e "FLUSH PRIVILEGES;"
     
-    echo "Base de datos configurada correctamente."
+    echo "Database successfully set up"
 fi
 
 mysqladmin -u root --password=${DB_ROOT_PASSWORD} shutdown
