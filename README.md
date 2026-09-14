@@ -84,10 +84,49 @@ images remain replaceable.
 
 Use a Debian 12 virtual machine without a graphical environment. Install
 Docker, Docker Compose V2, Git and Make. Add the project domain to the local
-hosts file when testing from the VM:
 
-```text
-127.0.0.1 eduaserr.42.fr
+```bash
+sudo apt update
+sudo apt install -y docker.io docker-compose-plugin
+```
+
+
+### Instalación manual
+Si el comando anterior no instala Docker Compose correctamente, añade el repositorio oficial de Docker.
+
+```bash
+sudo apt update && sudo apt install -y ca-certificates curl gnupg
+```
+Crea la carpeta para las claves:
+sudo install -m 0755 -d /etc/apt/keyrings
+
+Descarga la clave de Docker y repositorio de Debian oficial
+```bash
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg \
+  -o /etc/apt/keyrings/docker.asc
+
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" |
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+Instala Docker y sus plugins:
+```bash
+sudo apt install -y docker-ce docker-ce-cli containerd.io \
+  docker-buildx-plugin docker-compose-plugin
+```
+Inicia docker y añade al usuario al grupo docker
+```bash
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
+```
+reinicia o -> newgrp docker
+
+Comprueba la instalación:
+```bash
+docker --version
+docker compose version
 ```
 
 Create `srcs/.env` with the values expected by `docker-compose.yml`. Keep the
